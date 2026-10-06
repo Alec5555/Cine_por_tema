@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cine por tema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#161a33;--paper:#eceef6;--accent:#0f766e;--accent-ink:#fff;
+--head:'Bricolage Grotesque','Trebuchet MS',sans-serif;--body:'Source Serif 4',Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+header{padding:40px 0 24px}
+h1{font:800 clamp(2.2rem,6vw,3.6rem)/1 var(--head);margin:0 0 10px;letter-spacing:-.02em}
+header p{margin:0;max-width:52ch}
+.layout{display:grid;grid-template-columns:240px 1fr;gap:32px;padding-bottom:60px}
+nav{position:sticky;top:16px;align-self:start;display:flex;flex-direction:column;gap:6px}
+nav button{font:700 1rem var(--head);text-align:left;padding:12px 14px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:6px;cursor:pointer}
+nav button:hover{background:#fff}
+nav button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+nav .rand{margin-top:10px;border-style:dashed}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.band{background:var(--accent);color:var(--accent-ink);padding:28px 28px 24px;border-radius:10px 10px 0 0}
+.band h2{font:800 clamp(1.8rem,4.5vw,2.8rem)/1.05 var(--head);margin:0 0 8px;letter-spacing:-.02em}
+.band p{margin:0;max-width:56ch}
+ul{list-style:none;margin:0;padding:0;background:#fff;border-radius:0 0 10px 10px}
+li{padding:22px 28px;border-top:1px solid #d5d8e6}
+li:first-child{border-top:0}
+li h3{font:700 1.35rem/1.2 var(--head);margin:0}
+.meta{font-style:italic;margin:2px 0 6px;color:#4a4f73}
+li p{margin:0;max-width:62ch}
+footer{padding:20px 0 40px;color:#4a4f73;font-size:.9rem}
+@media(max-width:760px){
+.layout{grid-template-columns:1fr}
+nav{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px}
+nav button{white-space:nowrap}
+li{padding:18px 20px}.band{padding:22px 20px}}
+@media(prefers-reduced-motion:no-preference){.band{transition:background .3s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Cine por tema</h1>
+<p>Elige un tema y te mostramos cinco películas que valen la pena, con una razón para verlas.</p>
+</header>
+<div class="layout">
+<nav id="nav" aria-label="Temas"></nav>
+<main>
+<div class="band" id="band"><h2 id="t"></h2><p id="d"></p></div>
+<ul id="list"></ul>
+</main>
+</div>
+<footer>Selección personal. Edita el arreglo <code>TEMAS</code> en este archivo para agregar tus propias películas.</footer>
+</div>
+<script>
+const TEMAS=[
+{n:"Ciencia ficción para pensar",d:"Historias que usan el futuro para hacerte preguntas incómodas.",c:"#0f766e",p:[
+["Arrival (La llegada)",2016,"Denis Villeneuve","Un primer contacto alienígena que trata sobre el lenguaje, el tiempo y la pérdida."],
+["Ex Machina",2014,"Alex Garland","Una prueba de inteligencia artificial que se vuelve tensa en un espacio cerrado."],
+["Primer",2004,"Shane Carruth","Viajes en el tiempo con presupuesto mínimo y una trama que pide ver dos veces."],
+["Eterno resplandor de una mente sin recuerdos",2004,"Michel Gondry","¿Borrarías a alguien de tu memoria? Romance y ciencia ficción en una sola historia."],
+["Solaris",1972,"Andrei Tarkovski","Un clásico lento y hermoso sobre la culpa y lo que no podemos comprender."]]},
+{n:"Misterio con giro final",d:"Para ver con atención, porque la última escena cambia todo lo anterior.",c:"#9a3412",p:[
+["Memento",2000,"Christopher Nolan","Un hombre sin memoria reciente investiga un crimen, contado en orden inverso."],
+["Los sospechosos de siempre",1995,"Bryan Singer","Un interrogatorio, cinco criminales y un relato que no es lo que parece."],
+["Oldboy",2003,"Park Chan-wook","Quince años de encierro sin explicación y una venganza con un secreto brutal."],
+["El sexto sentido",1999,"M. Night Shyamalan","Un niño que ve lo que otros no, y un final que se volvió referencia del cine."],
+["Isla siniestra",2010,"Martin Scorsese","Un agente investiga una desaparición en un hospital psiquiátrico aislado."]]},
+{n:"Cine latinoamericano",d:"Historias de la región con mirada propia, humor, política y emoción.",c:"#b45309",p:[
+["Y tu mamá también",2001,"Alfonso Cuarón","Un viaje por carretera entre dos amigos y una mujer mayor, sobre amistad y clases sociales."],
+["El secreto de sus ojos",2009,"Juan José Campanella","Un caso sin cerrar y un amor que no se atrevió a decirse, en la Argentina de los años setenta."],
+["No",2012,"Pablo Larraín","La campaña publicitaria que ayudó a derrotar a Pinochet en el plebiscito de 1988."],
+["Amores perros",2000,"Alejandro González Iñárritu","Tres historias cruzadas por un accidente en Ciudad de México."],
+["Una mujer fantástica",2017,"Sebastián Lelio","Una mujer trans enfrenta el duelo y los prejuicios tras la muerte de su pareja."]]},
+{n:"Para llorar un rato",d:"Películas que emocionan sin ser manipuladoras. Ten pañuelos cerca.",c:"#be185d",p:[
+["Cinema Paradiso",1988,"Giuseppe Tornatore","La amistad entre un niño y un proyeccionista, y una carta de amor al cine."],
+["La vida es bella",1997,"Roberto Benigni","Un padre protege a su hijo del horror con humor e imaginación."],
+["Coco",2017,"Lee Unkrich","Música, familia y memoria alrededor del Día de Muertos."],
+["Siempre a tu lado, Hachiko",2009,"Lasse Hallström","La historia real de un perro que esperó años a su dueño."],
+["Up",2009,"Pete Docter","Sus primeros diez minutos son de lo más conmovedor que ha hecho la animación."]]},
+{n:"Terror que perturba",d:"Menos sustos fáciles y más angustia que se queda contigo después.",c:"#4c1d95",p:[
+["El resplandor",1980,"Stanley Kubrick","Un hotel aislado, un invierno largo y una familia que se desmorona."],
+["Hereditary",2018,"Ari Aster","Un duelo familiar que se convierte en pesadilla, con una actuación enorme de Toni Collette."],
+["Déjame entrar",2008,"Tomas Alfredson","Un niño acosado y su vecina vampiro, en una historia sueca fría y tierna."],
+["El orfanato",2007,"J. A. Bayona","Una madre busca a su hijo desaparecido en una casa llena de secretos."],
+["Un lugar en silencio",2018,"John Krasinski","Una familia sobrevive en un mundo donde cualquier ruido es mortal."]]},
+{n:"Comedias para reír en grupo",d:"Ideales para una noche con amigos, sin pensar demasiado.",c:"#1d4ed8",p:[
+["Un pez llamado Wanda",1988,"Charles Crichton","Un robo, cuatro estafadores y un caos británico muy bien armado."],
+["Bridesmaids (Damas en guerra)",2011,"Paul Feig","Una dama de honor al borde del colapso en la boda de su mejor amiga."],
+["Hot Fuzz",2007,"Edgar Wright","Un policía de élite llega a un pueblo tranquilo con secretos sangrientos."],
+["El gran hotel Budapest",2014,"Wes Anderson","Una aventura delirante y elegante con un conserje inolvidable."],
+["¿Qué pasó ayer?",2009,"Todd Phillips","Tres amigos despiertan sin recordar nada de la despedida de soltero."]]}
+];
+const nav=document.getElementById('nav'),list=document.getElementById('list');
+let actual=0;
+function pintar(i){
+ actual=i;const T=TEMAS[i];
+ document.documentElement.style.setProperty('--accent',T.c);
+ document.getElementById('t').textContent=T.n;
+ document.getElementById('d').textContent=T.d;
+ list.innerHTML=T.p.map(f=>`<li><h3>${f[0]}</h3><div class="meta">${f[1]}, dirigida por ${f[2]}</div><p>${f[3]}</p></li>`).join('');
+ [...nav.querySelectorAll('button[data-i]')].forEach(b=>b.setAttribute('aria-pressed',b.dataset.i==i));
+}
+TEMAS.forEach((T,i)=>{const b=document.createElement('button');b.textContent=T.n;b.dataset.i=i;b.setAttribute('aria-pressed','false');b.onclick=()=>pintar(i);nav.appendChild(b)});
+const r=document.createElement('button');r.className='rand';r.textContent='Sorpréndeme';
+r.onclick=()=>{let j;do{j=Math.floor(Math.random()*TEMAS.length)}while(j===actual);pintar(j)};
+nav.appendChild(r);
+pintar(0);
+</script>
+</body>
+</html>
